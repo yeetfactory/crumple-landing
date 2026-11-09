@@ -11,8 +11,8 @@ import { createNotes } from './notes'
 
 export type Engine = {
   yeetAll: () => void
-  /** Drops the letters in for the first time. */
-  start: () => void
+  /** Drops the letters in for the first time; resolves once they have landed. */
+  start: () => Promise<void>
   pullLever: (t: number) => void
   /** Crumples the page, throws it at the viewer. Resolves when the DOM may come back. */
   crumple: () => Promise<void>

@@ -5,6 +5,12 @@ import { unlockAudio } from './sound'
 export const engine: { current: Engine | null } = { current: null }
 
 let begun = false
+const beginListeners = new Set<() => void>()
+
+export function onBegin(listener: () => void) {
+  beginListeners.add(listener)
+  return () => { beginListeners.delete(listener) }
+}
 
 /**
  * Browsers block all audio until the visitor interacts, so the opening waits for that press and
@@ -16,7 +22,7 @@ export function begin(withSound: boolean) {
   if (begun) return
   begun = true
   document.documentElement.dataset.started = 'true'
-  engine.current?.start()
+  for (const listener of beginListeners) listener()
 }
 
 export const hasBegun = () => begun

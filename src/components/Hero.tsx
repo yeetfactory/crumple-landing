@@ -44,9 +44,9 @@ function SoundToggle() {
   )
 }
 
-function Actuator({ className = '', onPress }: { className?: string; onPress: () => void }) {
+function Actuator({ className = '', onPress, label = 'YEET' }: { className?: string; onPress: () => void; label?: string }) {
   return (
-    <button type="button" className={`actuator pointer-events-auto ${className}`} onClick={onPress}>
+    <button type="button" className={`actuator pointer-events-auto ${className}`} onClick={onPress} aria-label={label}>
       <svg viewBox="0 0 160 160" aria-hidden="true" style={{ filter: 'url(#rough)' }}>
         <path
           d="M80 12c38-2 68 28 68 66s-28 70-68 70-70-30-68-72C14 42 40 14 84 10"
@@ -110,8 +110,11 @@ export function Hero() {
       </h1>
 
       {/* The opening: an empty sheet, and the one thing that fills it. */}
-      <div className="gate absolute inset-x-0 top-[27%] flex justify-center sm:top-[24%]">
-        <Actuator className="actuator-large" onPress={() => begin(true)} />
+      <div className="gate absolute inset-x-0 top-[27%] flex flex-col items-center sm:top-[24%]">
+        <Actuator className="actuator-large" label="YEET — Click to start" onPress={() => begin(true)} />
+        <p className="m-0 mt-4 -rotate-3 font-hand text-[clamp(1.8rem,3vw,2.3rem)] leading-none" aria-hidden="true">
+          Click to start
+        </p>
       </div>
 
       <div className="after-start grid grid-cols-[1fr_auto] items-end gap-4 md:grid-cols-[1fr_auto_1fr]">
