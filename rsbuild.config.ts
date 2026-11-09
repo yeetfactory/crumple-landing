@@ -7,5 +7,14 @@ export default defineConfig({
   server: {
     port: 3000,
   },
-  plugins: [pluginReact(), pluginTailwindcss(), tanstackStart()],
+  plugins: [
+    pluginReact(),
+    pluginTailwindcss(),
+    tanstackStart({
+      prerender: {
+        enabled: true,
+      },
+      pages: [{ path: '/' }],
+    }),
+  ],
 })
