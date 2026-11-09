@@ -143,6 +143,9 @@ export function createHero(
 ) {
   // Audio can't play until the visitor does something, so the letters wait for that too.
   let started = false
+  let finishIntro!: () => void
+  const introComplete = new Promise<void>((resolve) => { finishIntro = resolve })
+  let introFinished = false
 
   const world = new CANNON.World({ gravity: new CANNON.Vec3(0, GRAVITY, 0) })
   world.allowSleep = true
@@ -543,6 +546,11 @@ export function createHero(
       }
     }
 
+    if (started && !introFinished && letters.every((l) => l.state !== 'waiting' && l.state !== 'dropping')) {
+      introFinished = true
+      finishIntro()
+    }
+
     for (const j of junk) {
       j.mesh.position.copy(j.body.position as unknown as THREE.Vector3)
       j.mesh.quaternion.copy(j.body.quaternion as unknown as THREE.Quaternion)
@@ -597,6 +605,7 @@ export function createHero(
     group,
     start: () => {
       started = true
+      return introComplete
     },
     telemetry,
     step,

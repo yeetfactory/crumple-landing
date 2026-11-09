@@ -19,6 +19,17 @@
 html {
   background: var(--color-paper);
   scrollbar-color: var(--color-chalk) var(--color-paper);
+  scrollbar-gutter: stable;
+}
+
+html[data-intro-locked],
+html[data-intro-locked] body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html[data-intro-locked] .stage {
+  touch-action: none;
 }
 
 body {
@@ -70,10 +81,11 @@ html[data-started] .gate {
 }
 html[data-engine="ready"]:not([data-started]) .after-start {
   opacity: 0;
+  visibility: hidden;
 }
 /* Only the arrival is animated. Hiding it on load has to be instant, or it ghosts in and out. */
 html[data-started] .after-start {
-  transition: opacity 0.7s linear 1.5s;
+  transition: opacity 0.7s linear 1.5s, visibility 0s linear 1.5s;
 }
 .actuator.actuator-large {
   width: clamp(11rem, 19vw, 17rem);
@@ -163,6 +175,9 @@ html[data-crumple="true"] main {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html[data-started] .after-start {
+    transition: none;
+  }
   .signature {
     clip-path: none;
     transition: none;
