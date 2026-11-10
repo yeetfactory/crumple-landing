@@ -29,6 +29,17 @@ bun install
 bun run dev        # http://localhost:3000
 ```
 
+## Checks
+
+```bash
+bun run check      # format, lint, typecheck, knip and tests
+bun run format:write
+```
+
+Formatting is `bun fmt`, linting is [Oxlint](https://oxc.rs) and type checking
+is `bun check` on TypeScript 7. Git hooks (lefthook) check staged files on
+commit and typecheck on push. Agent instructions are in `AGENTS.md`.
+
 ## Building and running in production
 
 ```bash

@@ -1,0 +1,16 @@
+{
+  "auto_install_extensions": {
+    "oxc": true
+  },
+  "lsp": {
+    "oxfmt": {
+      "initialization_options": {
+        "settings": {
+          "fmt.configPath": ".oxfmtrc.json"
+        }
+      }
+    }
+  },
+  "format_on_save": "on",
+  "formatter": [{ "language_server": { "name": "oxfmt" } }]
+}
