@@ -3,4 +3,4 @@ export const site = {
   name: 'Yeet Factory',
   domain: 'yeetfactory',
   people: ['Rishikesh', 'Sriram'],
-} as const
+} as const;

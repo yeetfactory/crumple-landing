@@ -1,11 +1,18 @@
-import { useEffect, useRef, useState } from 'react'
-import { site } from '#/site'
-import { begin, engine } from '#/lib/store'
-import { loadSoundPreference, playClick, setSoundEnabled, unlockAudio } from '#/lib/sound'
+import { useEffect, useRef, useState } from 'react';
+
+import {
+  loadSoundPreference,
+  playClick,
+  setSoundEnabled,
+  unlockAudio,
+} from '#/lib/sound';
+import { begin, engine } from '#/lib/store';
+import { site } from '#/site';
 
 function SoundToggle() {
-  const [on, setOn] = useState(true)
-  useEffect(() => setOn(loadSoundPreference()), [])
+  const [on, setOn] = useState(true);
+  useEffect(() => setOn(loadSoundPreference()), []);
+
   return (
     <button
       type="button"
@@ -13,10 +20,10 @@ function SoundToggle() {
       aria-label={on ? 'Turn sound off' : 'Turn sound on'}
       aria-pressed={on}
       onClick={() => {
-        unlockAudio()
-        setSoundEnabled(!on)
-        setOn(!on)
-        playClick()
+        unlockAudio();
+        setSoundEnabled(!on);
+        setOn(!on);
+        playClick();
       }}
     >
       <svg
@@ -41,13 +48,30 @@ function SoundToggle() {
         )}
       </svg>
     </button>
-  )
+  );
 }
 
-function Actuator({ className = '', onPress, label = 'YEET' }: { className?: string; onPress: () => void; label?: string }) {
+function Actuator({
+  className = '',
+  onPress,
+  label = 'YEET',
+}: {
+  className?: string;
+  onPress: () => void;
+  label?: string;
+}) {
   return (
-    <button type="button" className={`actuator pointer-events-auto ${className}`} onClick={onPress} aria-label={label}>
-      <svg viewBox="0 0 160 160" aria-hidden="true" style={{ filter: 'url(#rough)' }}>
+    <button
+      type="button"
+      className={`actuator pointer-events-auto ${className}`}
+      onClick={onPress}
+      aria-label={label}
+    >
+      <svg
+        viewBox="0 0 160 160"
+        aria-hidden="true"
+        style={{ filter: 'url(#rough)' }}
+      >
         <path
           d="M80 12c38-2 68 28 68 66s-28 70-68 70-70-30-68-72C14 42 40 14 84 10"
           fill="none"
@@ -65,25 +89,28 @@ function Actuator({ className = '', onPress, label = 'YEET' }: { className?: str
       </svg>
       <span>YEET</span>
     </button>
-  )
+  );
 }
 
 export function Hero() {
-  const overlay = useRef<HTMLElement>(null)
+  const overlay = useRef<HTMLElement>(null);
 
   // The lettering dissolves as the camera takes off, so it never sits over the flight.
   useEffect(() => {
     const update = () => {
-      const el = overlay.current
-      if (!el) return
-      const fade = 1 - scrollY / (el.offsetHeight * 0.3)
-      el.style.opacity = String(Math.max(0, fade))
-      el.style.visibility = fade <= 0 ? 'hidden' : 'visible'
-    }
-    update()
-    addEventListener('scroll', update, { passive: true })
-    return () => removeEventListener('scroll', update)
-  }, [])
+      const el = overlay.current;
+
+      if (!el) return;
+      const fade = 1 - scrollY / (el.offsetHeight * 0.3);
+      el.style.opacity = String(Math.max(0, fade));
+      el.style.visibility = fade <= 0 ? 'hidden' : 'visible';
+    };
+
+    update();
+    addEventListener('scroll', update, { passive: true });
+
+    return () => removeEventListener('scroll', update);
+  }, []);
 
   return (
     <section
@@ -111,8 +138,15 @@ export function Hero() {
 
       {/* The opening: an empty sheet, and the one thing that fills it. */}
       <div className="gate absolute inset-x-0 top-[27%] flex flex-col items-center sm:top-[24%]">
-        <Actuator className="actuator-large" label="YEET — Click to start" onPress={() => begin(true)} />
-        <p className="m-0 mt-4 -rotate-3 font-hand text-[clamp(1.8rem,3vw,2.3rem)] leading-none" aria-hidden="true">
+        <Actuator
+          className="actuator-large"
+          label="YEET — Click to start"
+          onPress={() => begin(true)}
+        />
+        <p
+          className="m-0 mt-4 -rotate-3 font-hand text-[clamp(1.8rem,3vw,2.3rem)] leading-none"
+          aria-hidden="true"
+        >
           Click to start
         </p>
       </div>
@@ -128,8 +162,8 @@ export function Hero() {
           </p>
           <Actuator
             onPress={() => {
-              unlockAudio()
-              engine.current?.yeetAll()
+              unlockAudio();
+              engine.current?.yeetAll();
             }}
           />
         </div>
@@ -141,5 +175,5 @@ export function Hero() {
         </p>
       </div>
     </section>
-  )
+  );
 }

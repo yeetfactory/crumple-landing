@@ -1,6 +1,7 @@
-import * as THREE from 'three'
-import { createPaper } from './paper'
-import { CHALK, PAPER, RED } from './palette'
+import * as THREE from 'three';
+
+import { CHALK, PAPER, RED } from './palette';
+import { createPaper } from './paper';
 
 /**
  * The look of the whole site lives here.
@@ -15,16 +16,20 @@ import { CHALK, PAPER, RED } from './palette'
  */
 
 /** Non-geometry marks live on layer 1, so they never produce outlines. */
-export const INK_LAYER = 1
+export const INK_LAYER = 1;
 
-export function inkMaterial(map: THREE.Texture | null, red = false, opacity = 1) {
+export function inkMaterial(
+  map: THREE.Texture | null,
+  red = false,
+  opacity = 1,
+) {
   return new THREE.MeshBasicMaterial({
     map,
     color: red ? 0x0000ff : 0x00ff00,
     transparent: true,
     depthWrite: false,
     opacity,
-  })
+  });
 }
 
 /** Analytic ground grid. Fades with distance, so it can't alias into moire at the horizon. */
@@ -55,13 +60,18 @@ export function gridMaterial() {
         float fade = 1.0 - smoothstep(26.0, 74.0, vDistance);
         gl_FragColor = vec4(0.0, 1.0, 0.0, max(fine, major) * fade);
       }`,
-  })
+  });
 }
 
 const vec = (hex: string) => {
-  const n = parseInt(hex.slice(1), 16)
-  return new THREE.Vector3((n >> 16) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255)
-}
+  const n = parseInt(hex.slice(1), 16);
+
+  return new THREE.Vector3(
+    (n >> 16) / 255,
+    ((n >> 8) & 255) / 255,
+    (n & 255) / 255,
+  );
+};
 
 const fragment = /* glsl */ `
   precision highp float;
@@ -186,7 +196,7 @@ const fragment = /* glsl */ `
 
     gl_FragColor = vec4(col, 1.0);
   }
-`
+`;
 
 /**
  * The finale: the simulated sheet (see paper.ts) wearing a snapshot of the finished page. Facets
@@ -213,7 +223,7 @@ const crumpleVertex = /* glsl */ `
     vPos = world.xyz;
     gl_Position = projectionMatrix * viewMatrix * world;
   }
-`
+`;
 
 const crumpleFragment = /* glsl */ `
   precision highp float;
@@ -249,20 +259,22 @@ const crumpleFragment = /* glsl */ `
 
     gl_FragColor = vec4(col, 1.0);
   }
-`
+`;
 
 export function createInk(
   renderer: THREE.WebGLRenderer,
   scene: THREE.Scene,
   camera: THREE.PerspectiveCamera,
 ) {
-  const tone = new THREE.WebGLRenderTarget(1, 1, { samples: 4 })
+  const tone = new THREE.WebGLRenderTarget(1, 1, { samples: 4 });
+
   const shape = new THREE.WebGLRenderTarget(1, 1, {
     minFilter: THREE.NearestFilter,
     magFilter: THREE.NearestFilter,
     depthTexture: new THREE.DepthTexture(1, 1),
-  })
-  const normals = new THREE.MeshNormalMaterial()
+  });
+
+  const normals = new THREE.MeshNormalMaterial();
 
   const composite = new THREE.ShaderMaterial({
     depthTest: false,
@@ -289,16 +301,17 @@ export function createInk(
         gl_Position = vec4(position.xy, 0.0, 1.0);
       }`,
     fragmentShader: fragment,
-  })
+  });
 
-  const screen = new THREE.Scene()
-  const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), composite)
-  quad.frustumCulled = false
-  screen.add(quad)
-  const screenCamera = new THREE.Camera()
+  const screen = new THREE.Scene();
+  const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), composite);
+  quad.frustumCulled = false;
+  screen.add(quad);
+  const screenCamera = new THREE.Camera();
 
   /* The paper ball */
-  const snapshot = new THREE.WebGLRenderTarget(1, 1)
+  const snapshot = new THREE.WebGLRenderTarget(1, 1);
+
   const paper = new THREE.ShaderMaterial({
     side: THREE.DoubleSide,
     uniforms: {
@@ -310,111 +323,132 @@ export function createInk(
     },
     vertexShader: crumpleVertex,
     fragmentShader: crumpleFragment,
-  })
-  const paperScene = new THREE.Scene()
-  let paperMesh: THREE.Mesh | null = null
-  let sheet: ReturnType<typeof createPaper> | null = null
-  const paperCamera = new THREE.PerspectiveCamera(30, 1, 0.1, 40)
-  paperCamera.position.z = 1 / Math.tan(THREE.MathUtils.degToRad(15))
-  let paperActive = false
+  });
 
-  const white = new THREE.Color(1, 1, 1)
-  const facing = new THREE.Color(0.5, 0.5, 1)
+  const paperScene = new THREE.Scene();
+  let paperMesh: THREE.Mesh | null = null;
+  let sheet: ReturnType<typeof createPaper> | null = null;
+  const paperCamera = new THREE.PerspectiveCamera(30, 1, 0.1, 40);
+  paperCamera.position.z = 1 / Math.tan(THREE.MathUtils.degToRad(15));
+  let paperActive = false;
+
+  const white = new THREE.Color(1, 1, 1);
+  const facing = new THREE.Color(0.5, 0.5, 1);
 
   return {
     resize(width: number, height: number, ratio: number) {
-      const w = Math.floor(width * ratio)
-      const h = Math.floor(height * ratio)
-      tone.setSize(w, h)
-      shape.setSize(w, h)
-      snapshot.setSize(w, h)
-      composite.uniforms.res.value.set(w, h)
-      composite.uniforms.dpr.value = ratio
+      const w = Math.floor(width * ratio);
+      const h = Math.floor(height * ratio);
+      tone.setSize(w, h);
+      shape.setSize(w, h);
+      snapshot.setSize(w, h);
+      composite.uniforms.res.value.set(w, h);
+      composite.uniforms.dpr.value = ratio;
 
-      paperCamera.aspect = width / height
-      paperCamera.updateProjectionMatrix()
+      paperCamera.aspect = width / height;
+      paperCamera.updateProjectionMatrix();
     },
     /** Points the shader at the glass layer's offset map. Re-uploads only when it changed. */
     refractThrough(map: HTMLCanvasElement, changed: boolean, active: boolean) {
-      let texture = composite.uniforms.tRefract.value as THREE.CanvasTexture | null
+      let texture = composite.uniforms.tRefract
+        .value as THREE.CanvasTexture | null;
+
       if (!texture || changed) {
-        texture?.dispose()
-        texture = new THREE.CanvasTexture(map)
-        composite.uniforms.tRefract.value = texture
+        texture?.dispose();
+        texture = new THREE.CanvasTexture(map);
+        composite.uniforms.tRefract.value = texture;
       }
-      composite.uniforms.refract.value = active ? 34 : 0
+
+      composite.uniforms.refract.value = active ? 34 : 0;
     },
     /** Freezes the current frame, annotations included, onto the sheet about to be crushed. */
     freezeSheet(notes: HTMLCanvasElement) {
-      renderer.setRenderTarget(snapshot)
-      renderer.render(screen, screenCamera)
-      renderer.setRenderTarget(null)
-      ;(paper.uniforms.tNotes.value as THREE.Texture | null)?.dispose()
-      paper.uniforms.tNotes.value = new THREE.CanvasTexture(notes)
-      paper.uniforms.crumple.value = 0
-      paper.uniforms.ball.value.identity()
+      renderer.setRenderTarget(snapshot);
+      renderer.render(screen, screenCamera);
+      renderer.setRenderTarget(null);
+      (paper.uniforms.tNotes.value as THREE.Texture | null)?.dispose();
+      paper.uniforms.tNotes.value = new THREE.CanvasTexture(notes);
+      paper.uniforms.crumple.value = 0;
+      paper.uniforms.ball.value.identity();
 
       if (paperMesh) {
-        paperScene.remove(paperMesh)
-        paperMesh.geometry.dispose()
+        paperScene.remove(paperMesh);
+        paperMesh.geometry.dispose();
       }
-      sheet = createPaper(paperCamera.aspect)
-      const geometry = new THREE.BufferGeometry()
-      geometry.setAttribute('position', new THREE.BufferAttribute(sheet.positions, 3))
-      geometry.setAttribute('uv', new THREE.BufferAttribute(sheet.texcoords, 2))
-      geometry.setAttribute('aBary', new THREE.BufferAttribute(sheet.barycentric, 3))
-      geometry.setAttribute('aWear', new THREE.BufferAttribute(sheet.wear, 3))
-      paperMesh = new THREE.Mesh(geometry, paper)
-      paperMesh.frustumCulled = false
-      paperScene.add(paperMesh)
-      paperActive = true
+
+      sheet = createPaper(paperCamera.aspect);
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute(
+        'position',
+        new THREE.BufferAttribute(sheet.positions, 3),
+      );
+      geometry.setAttribute(
+        'uv',
+        new THREE.BufferAttribute(sheet.texcoords, 2),
+      );
+      geometry.setAttribute(
+        'aBary',
+        new THREE.BufferAttribute(sheet.barycentric, 3),
+      );
+      geometry.setAttribute('aWear', new THREE.BufferAttribute(sheet.wear, 3));
+      paperMesh = new THREE.Mesh(geometry, paper);
+      paperMesh.frustumCulled = false;
+      paperScene.add(paperMesh);
+      paperActive = true;
     },
     /** Advances the simulation. Pass a radius while squeezing, or null once it's settled. */
-    setPaper(crumple: number, ball: THREE.Matrix4, radius: number | null, wrap = 0) {
-      paper.uniforms.crumple.value = crumple
-      paper.uniforms.ball.value.copy(ball)
-      if (radius === null || !sheet || !paperMesh) return
-      paper.uniforms.radius.value = radius
-      sheet.squeeze(radius, wrap)
-      paperMesh.geometry.attributes.position.needsUpdate = true
-      paperMesh.geometry.attributes.aWear.needsUpdate = true
+    setPaper(
+      crumple: number,
+      ball: THREE.Matrix4,
+      radius: number | null,
+      wrap = 0,
+    ) {
+      paper.uniforms.crumple.value = crumple;
+      paper.uniforms.ball.value.copy(ball);
+
+      if (radius === null || !sheet || !paperMesh) return;
+      paper.uniforms.radius.value = radius;
+      sheet.squeeze(radius, wrap);
+      paperMesh.geometry.attributes.position.needsUpdate = true;
+      paperMesh.geometry.attributes.aWear.needsUpdate = true;
     },
     dropPaper() {
-      paperActive = false
+      paperActive = false;
     },
     render(seed: number) {
-      composite.uniforms.seed.value = seed
+      composite.uniforms.seed.value = seed;
 
-      camera.layers.enable(INK_LAYER)
-      renderer.shadowMap.autoUpdate = true
-      renderer.setRenderTarget(tone)
-      renderer.setClearColor(white, 1)
-      renderer.clear()
-      renderer.render(scene, camera)
+      camera.layers.enable(INK_LAYER);
+      renderer.shadowMap.autoUpdate = true;
+      renderer.setRenderTarget(tone);
+      renderer.setClearColor(white, 1);
+      renderer.clear();
+      renderer.render(scene, camera);
 
-      camera.layers.disable(INK_LAYER)
-      renderer.shadowMap.autoUpdate = false
-      scene.overrideMaterial = normals
-      renderer.setRenderTarget(shape)
-      renderer.setClearColor(facing, 1)
-      renderer.clear()
-      renderer.render(scene, camera)
-      scene.overrideMaterial = null
+      camera.layers.disable(INK_LAYER);
+      renderer.shadowMap.autoUpdate = false;
+      scene.overrideMaterial = normals;
+      renderer.setRenderTarget(shape);
+      renderer.setClearColor(facing, 1);
+      renderer.clear();
+      renderer.render(scene, camera);
+      scene.overrideMaterial = null;
 
-      renderer.setRenderTarget(null)
-      renderer.render(screen, screenCamera)
+      renderer.setRenderTarget(null);
+      renderer.render(screen, screenCamera);
+
       if (paperActive) {
-        renderer.clearDepth()
-        renderer.render(paperScene, paperCamera)
+        renderer.clearDepth();
+        renderer.render(paperScene, paperCamera);
       }
     },
     dispose() {
-      tone.dispose()
-      shape.dispose()
-      normals.dispose()
-      composite.dispose()
-      snapshot.dispose()
-      paper.dispose()
+      tone.dispose();
+      shape.dispose();
+      normals.dispose();
+      composite.dispose();
+      snapshot.dispose();
+      paper.dispose();
     },
-  }
+  };
 }
