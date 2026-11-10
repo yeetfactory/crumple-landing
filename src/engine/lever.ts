@@ -29,38 +29,38 @@ function add(
 
 /** Toothed quadrant plate, the bit a real signal-box lever ratchets along. */
 function quadrant(depth: number) {
-  const shape = new THREE.Shape();
+  const plate = new THREE.Shape();
   const inner = 0.6;
   const outer = 4;
   const from = Math.PI / 2 - 0.95;
   const to = Math.PI / 2 + 0.95;
-  shape.moveTo(Math.cos(from) * inner, Math.sin(from) * inner);
+  plate.moveTo(Math.cos(from) * inner, Math.sin(from) * inner);
   const teeth = 15;
 
   for (let i = 0; i <= teeth; i++) {
     const a = from + ((to - from) * i) / teeth;
     const step = (to - from) / teeth;
-    shape.lineTo(Math.cos(a) * outer, Math.sin(a) * outer);
+    plate.lineTo(Math.cos(a) * outer, Math.sin(a) * outer);
 
     if (i < teeth) {
-      shape.lineTo(
+      plate.lineTo(
         Math.cos(a + step * 0.5) * outer,
         Math.sin(a + step * 0.5) * outer,
       );
-      shape.lineTo(
+      plate.lineTo(
         Math.cos(a + step * 0.5) * (outer - 0.22),
         Math.sin(a + step * 0.5) * (outer - 0.22),
       );
-      shape.lineTo(
+      plate.lineTo(
         Math.cos(a + step) * (outer - 0.22),
         Math.sin(a + step) * (outer - 0.22),
       );
     }
   }
 
-  shape.lineTo(Math.cos(to) * inner, Math.sin(to) * inner);
-  shape.closePath();
-  const geo = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false });
+  plate.lineTo(Math.cos(to) * inner, Math.sin(to) * inner);
+  plate.closePath();
+  const geo = new THREE.ExtrudeGeometry(plate, { depth, bevelEnabled: false });
   geo.translate(0, 0, -depth / 2);
 
   return geo;

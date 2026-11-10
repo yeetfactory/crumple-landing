@@ -36,7 +36,7 @@ function send(type, properties = {}) {
     Object.defineProperty(event, key, { value });
   }
 
-  for (const listener of [...(listeners.get(type) ?? [])]) listener(event);
+  for (const listener of Array.from(listeners.get(type) ?? [])) listener(event);
 
   return event;
 }

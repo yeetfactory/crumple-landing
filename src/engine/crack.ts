@@ -24,6 +24,65 @@ type Shard = {
   spin: number;
 };
 
+function trace(c: CanvasRenderingContext2D, p: number[]) {
+  c.beginPath();
+  c.moveTo(p[0], p[1]);
+
+  for (let i = 2; i < p.length; i += 2) c.lineTo(p[i], p[i + 1]);
+  c.closePath();
+}
+
+/** A crack from the impact: straight-ish, with small kinks where the glass gave way. */
+function buildRay(angle: number, length: number) {
+  const stops: { r: number; a: number }[] = [{ r: 0, a: angle }];
+  let r = 0;
+  let a = angle;
+
+  while (r < length) {
+    r += 24 + Math.random() * 62;
+    a += (Math.random() - 0.5) * 0.09;
+    stops.push({ r, a });
+  }
+
+  return stops;
+}
+
+function along(
+  ray: { r: number; a: number }[],
+  x: number,
+  y: number,
+  from: number,
+  to: number,
+) {
+  const out: number[] = [];
+  const start = { r: from, a: at(ray, from) };
+  const end = { r: to, a: at(ray, to) };
+
+  const between = ray.filter(
+    (s) => s.r > Math.min(from, to) && s.r < Math.max(from, to),
+  );
+
+  if (from > to) between.reverse();
+
+  for (const s of [start, ...between, end]) {
+    out.push(x + Math.cos(s.a) * s.r, y + Math.sin(s.a) * s.r);
+  }
+
+  return out;
+}
+
+function at(ray: { r: number; a: number }[], r: number) {
+  for (let i = 1; i < ray.length; i++) {
+    if (ray[i].r >= r) {
+      const t = (r - ray[i - 1].r) / (ray[i].r - ray[i - 1].r);
+
+      return ray[i - 1].a + (ray[i].a - ray[i - 1].a) * t;
+    }
+  }
+
+  return ray[ray.length - 1].a;
+}
+
 export function createCrackLayer(
   canvas: HTMLCanvasElement,
   calm: boolean,
@@ -54,14 +113,6 @@ export function createCrackLayer(
     offsets.width = Math.ceil(innerWidth / 2);
     offsets.height = Math.ceil(innerHeight / 2);
     clear();
-  }
-
-  function trace(c: CanvasRenderingContext2D, p: number[]) {
-    c.beginPath();
-    c.moveTo(p[0], p[1]);
-
-    for (let i = 2; i < p.length; i += 2) c.lineTo(p[i], p[i + 1]);
-    c.closePath();
   }
 
   function paint(s: Shard) {
@@ -127,57 +178,6 @@ export function createCrackLayer(
     ctx?.clearRect(0, 0, innerWidth, innerHeight);
     shards.forEach(paint);
     paintPits();
-  }
-
-  /** A crack from the impact: straight-ish, with small kinks where the glass gave way. */
-  function buildRay(angle: number, length: number) {
-    const stops: { r: number; a: number }[] = [{ r: 0, a: angle }];
-    let r = 0;
-    let a = angle;
-
-    while (r < length) {
-      r += 24 + Math.random() * 62;
-      a += (Math.random() - 0.5) * 0.09;
-      stops.push({ r, a });
-    }
-
-    return stops;
-  }
-
-  function along(
-    ray: { r: number; a: number }[],
-    x: number,
-    y: number,
-    from: number,
-    to: number,
-  ) {
-    const out: number[] = [];
-    const start = { r: from, a: at(ray, from) };
-    const end = { r: to, a: at(ray, to) };
-
-    const between = ray.filter(
-      (s) => s.r > Math.min(from, to) && s.r < Math.max(from, to),
-    );
-
-    if (from > to) between.reverse();
-
-    for (const s of [start, ...between, end]) {
-      out.push(x + Math.cos(s.a) * s.r, y + Math.sin(s.a) * s.r);
-    }
-
-    return out;
-  }
-
-  function at(ray: { r: number; a: number }[], r: number) {
-    for (let i = 1; i < ray.length; i++) {
-      if (ray[i].r >= r) {
-        const t = (r - ray[i - 1].r) / (ray[i].r - ray[i - 1].r);
-
-        return ray[i - 1].a + (ray[i].a - ray[i - 1].a) * t;
-      }
-    }
-
-    return ray[ray.length - 1].a;
   }
 
   function crack(x: number, y: number, force: number) {

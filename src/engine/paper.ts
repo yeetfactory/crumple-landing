@@ -132,9 +132,15 @@ export function createPaper(aspect: number) {
     for (let c = 0; c < nx; c++) {
       const i = r * nx + c;
 
-      if (c + 3 < nx) (bendA.push(i), bendB.push(i + 3));
+      if (c + 3 < nx) {
+        bendA.push(i);
+        bendB.push(i + 3);
+      }
 
-      if (r + 3 < ny) (bendA.push(i), bendB.push(i + 3 * nx));
+      if (r + 3 < ny) {
+        bendA.push(i);
+        bendB.push(i + 3 * nx);
+      }
     }
   }
 

@@ -18,6 +18,8 @@ let rig: Rig | null = null;
 let enabled = true;
 let lastGlass = -1;
 
+const preferenceListeners = new Set<() => void>();
+
 export function loadSoundPreference() {
   enabled = localStorage.getItem(STORAGE_KEY) !== 'off';
 
@@ -27,6 +29,17 @@ export function loadSoundPreference() {
 export function setSoundEnabled(next: boolean) {
   enabled = next;
   localStorage.setItem(STORAGE_KEY, next ? 'on' : 'off');
+
+  for (const listener of preferenceListeners) listener();
+}
+
+/** Lets the sound toggle re-read the preference whenever it changes. */
+export function onSoundPreferenceChange(listener: () => void) {
+  preferenceListeners.add(listener);
+
+  return () => {
+    preferenceListeners.delete(listener);
+  };
 }
 
 /** A warehouse: a second of decaying noise that gets darker as it dies away. */

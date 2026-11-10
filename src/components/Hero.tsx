@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 
 import {
   loadSoundPreference,
+  onSoundPreferenceChange,
   playClick,
   setSoundEnabled,
   unlockAudio,
@@ -10,8 +11,12 @@ import { begin, engine } from '#/lib/store';
 import { site } from '#/site';
 
 function SoundToggle() {
-  const [on, setOn] = useState(true);
-  useEffect(() => setOn(loadSoundPreference()), []);
+  // The prerendered page assumes sound is on; the stored choice applies once the page is live.
+  const on = useSyncExternalStore(
+    onSoundPreferenceChange,
+    loadSoundPreference,
+    () => true,
+  );
 
   return (
     <button
@@ -22,7 +27,6 @@ function SoundToggle() {
       onClick={() => {
         unlockAudio();
         setSoundEnabled(!on);
-        setOn(!on);
         playClick();
       }}
     >

@@ -76,7 +76,7 @@ function gearGeometry(
   inner: number,
   depth: number,
 ) {
-  const shape = new THREE.Shape();
+  const gear = new THREE.Shape();
 
   for (let i = 0; i < teeth; i++) {
     const a = (i / teeth) * Math.PI * 2;
@@ -93,17 +93,17 @@ function gearGeometry(
       const x = Math.cos(t) * r;
       const y = Math.sin(t) * r;
 
-      if (i === 0 && j === 0) shape.moveTo(x, y);
-      else shape.lineTo(x, y);
+      if (i === 0 && j === 0) gear.moveTo(x, y);
+      else gear.lineTo(x, y);
     });
   }
 
-  shape.closePath();
+  gear.closePath();
   const hole = new THREE.Path();
   hole.absarc(0, 0, inner * 0.36, 0, Math.PI * 2, true);
-  shape.holes.push(hole);
+  gear.holes.push(hole);
 
-  const geo = new THREE.ExtrudeGeometry(shape, {
+  const geo = new THREE.ExtrudeGeometry(gear, {
     depth,
     bevelEnabled: false,
     curveSegments: 20,

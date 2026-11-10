@@ -20,9 +20,10 @@ export function Stage() {
     const treeEl = byId('tree');
     const finaleEl = byId('finale');
 
-    if (!canvas.current || !crackCanvas.current || !notesCanvas.current) return;
+    if (!canvas.current || !crackCanvas.current || !notesCanvas.current)
+      return undefined;
 
-    if (!heroEl || !lineEl || !treeEl || !finaleEl) return;
+    if (!heroEl || !lineEl || !treeEl || !finaleEl) return undefined;
 
     const intro = createIntroGate();
     let starting = false;
@@ -66,23 +67,32 @@ export function Stage() {
     };
 
     // three.js stays out of the first paint. The blue sheet and DOM title are already up.
-    import('#/engine')
-      .then(({ createEngine }) => createEngine(args))
-      .then((created) => {
-        if (cancelled) return created.destroy();
+    const loadEngine = async () => {
+      try {
+        const { createEngine } = await import('#/engine');
+        const created = await createEngine(args);
+
+        if (cancelled) {
+          created.destroy();
+
+          return;
+        }
+
         clearTimeout(fallbackTimer);
         engine.current = created;
         document.documentElement.dataset.engine = 'ready';
 
         if (hasBegun()) startIntro();
-      })
-      .catch((error: unknown) => {
+      } catch (error) {
         // No WebGL: the page still reads fine on flat paper.
         console.warn('Drawing engine offline:', error);
         clearTimeout(fallbackTimer);
 
         if (!cancelled) intro.destroy();
-      });
+      }
+    };
+
+    void loadEngine();
 
     if (
       matchMedia('(prefers-reduced-motion: reduce)').matches ||

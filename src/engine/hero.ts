@@ -163,11 +163,11 @@ export type HeroCallbacks = {
 function glyphGeometry(glyph: keyof typeof GLYPHS) {
   const { outline, width } = GLYPHS[glyph];
 
-  const shape = new THREE.Shape(
+  const profile = new THREE.Shape(
     outline.map(([x, y]) => new THREE.Vector2(x, y)),
   );
 
-  const geo = new THREE.ExtrudeGeometry(shape, {
+  const geo = new THREE.ExtrudeGeometry(profile, {
     depth: DEPTH,
     bevelEnabled: false,
     curveSegments: 1,
@@ -253,20 +253,22 @@ export function createHero(
 
   const floor = new CANNON.Body({
     type: CANNON.Body.STATIC,
-    shape: new CANNON.Plane(),
     collisionFilterGroup: GROUP.floor,
     collisionFilterMask: GROUP.object,
   });
+
+  floor.addShape(new CANNON.Plane());
 
   floor.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
   world.addBody(floor);
 
   const glass = new CANNON.Body({
     type: CANNON.Body.STATIC,
-    shape: new CANNON.Plane(),
     collisionFilterGroup: GROUP.glass,
     collisionFilterMask: GROUP.object,
   });
+
+  glass.addShape(new CANNON.Plane());
 
   glass.quaternion.setFromEuler(0, Math.PI, 0);
   world.addBody(glass);
@@ -298,6 +300,8 @@ export function createHero(
 
   const letters: Letter[] = [];
   const grabbable: THREE.Object3D[] = [];
+  /** The physics body behind each grabbable mesh. */
+  const bodies = new WeakMap<THREE.Object3D, CANNON.Body>();
 
   let cursor = -WORD_WIDTH / 2;
   WORD.forEach((glyph, i) => {
@@ -312,7 +316,7 @@ export function createHero(
 
     const body = glyphBody(glyph);
     world.addBody(body);
-    mesh.userData.body = body;
+    bodies.set(mesh, body);
 
     const letter: Letter = {
       body,
@@ -434,7 +438,7 @@ export function createHero(
     const kind = Math.floor(Math.random() * 3);
     const geo = [nutGeo, ballGeo, cubeGeo][kind];
 
-    const shape = [
+    const collider = [
       new CANNON.Cylinder(0.72, 0.72, 0.5, 6),
       new CANNON.Sphere(0.6),
       new CANNON.Box(new CANNON.Vec3(0.525, 0.525, 0.525)),
@@ -442,11 +446,12 @@ export function createHero(
 
     const body = new CANNON.Body({
       mass: 2.5,
-      shape,
       angularDamping: 0.2,
       collisionFilterGroup: GROUP.object,
       collisionFilterMask: ALL,
     });
+
+    body.addShape(collider);
 
     body.position.set(x, 18 + Math.random() * 4, z);
     body.quaternion.setFromEuler(
@@ -462,7 +467,7 @@ export function createHero(
     world.addBody(body);
     const mesh = new THREE.Mesh(geo, solid);
     mesh.castShadow = true;
-    mesh.userData.body = body;
+    bodies.set(mesh, body);
     group.add(mesh);
     grabbable.push(mesh);
     junk.push({ body, mesh });
@@ -556,7 +561,9 @@ export function createHero(
     const hit = hitTest(clientX, clientY);
 
     if (!hit) return false;
-    const body = hit.object.userData.body as CANNON.Body;
+    const body = bodies.get(hit.object);
+
+    if (!body) return false;
     const letter = letters.find((l) => l.body === body);
 
     if (letter) {

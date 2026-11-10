@@ -35,6 +35,20 @@ type Point = [number, number];
 
 const scratch = new THREE.Vector3();
 
+const segment = (a: Point, b: Point, steps = 44): Point[] =>
+  Array.from({ length: steps + 1 }, (_, i) => {
+    const t = i / steps;
+
+    return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+  });
+
+const ring = (cx: number, cy: number, r: number): Point[] =>
+  Array.from({ length: 73 }, (_, i) => {
+    const a = (i / 72) * Math.PI * 2 - Math.PI / 2;
+
+    return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
+  });
+
 export function createNotes(canvas: HTMLCanvasElement, camera: THREE.Camera) {
   const ctx = canvas.getContext('2d');
 
@@ -81,20 +95,6 @@ export function createNotes(canvas: HTMLCanvasElement, camera: THREE.Camera) {
 
     ctx.stroke();
   }
-
-  const segment = (a: Point, b: Point, steps = 44): Point[] =>
-    Array.from({ length: steps + 1 }, (_, i) => {
-      const t = i / steps;
-
-      return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
-    });
-
-  const ring = (cx: number, cy: number, r: number): Point[] =>
-    Array.from({ length: 73 }, (_, i) => {
-      const a = (i / 72) * Math.PI * 2 - Math.PI / 2;
-
-      return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
-    });
 
   function lettering(
     text: string,
@@ -194,10 +194,10 @@ export function createNotes(canvas: HTMLCanvasElement, camera: THREE.Camera) {
     for (const f of flights) {
       ctx.setLineDash([9, 8]);
       pencil(
-        f.trail.map((t) => {
+        f.trail.map((t): Point => {
           const p = project(t);
 
-          return [p.x, p.y] as Point;
+          return [p.x, p.y];
         }),
         1,
         2,

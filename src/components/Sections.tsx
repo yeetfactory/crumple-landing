@@ -33,7 +33,7 @@ function Signature({ name }: { name: string }) {
   useEffect(() => {
     const el = ref.current;
 
-    if (!el) return;
+    if (!el) return undefined;
 
     const seen = new IntersectionObserver(
       ([entry]) => {

@@ -268,7 +268,7 @@ export function createInk(
 ) {
   const tone = new THREE.WebGLRenderTarget(1, 1, { samples: 4 });
 
-  const shape = new THREE.WebGLRenderTarget(1, 1, {
+  const normalDepth = new THREE.WebGLRenderTarget(1, 1, {
     minFilter: THREE.NearestFilter,
     magFilter: THREE.NearestFilter,
     depthTexture: new THREE.DepthTexture(1, 1),
@@ -276,14 +276,18 @@ export function createInk(
 
   const normals = new THREE.MeshNormalMaterial();
 
+  const refractMap: THREE.IUniform<THREE.CanvasTexture | null> = {
+    value: null,
+  };
+
   const composite = new THREE.ShaderMaterial({
     depthTest: false,
     depthWrite: false,
     uniforms: {
       tTone: { value: tone.texture },
-      tNormal: { value: shape.texture },
-      tDepth: { value: shape.depthTexture },
-      tRefract: { value: null as THREE.Texture | null },
+      tNormal: { value: normalDepth.texture },
+      tDepth: { value: normalDepth.depthTexture },
+      tRefract: refractMap,
       refract: { value: 0 },
       res: { value: new THREE.Vector2(1, 1) },
       seed: { value: 0 },
@@ -311,12 +315,13 @@ export function createInk(
 
   /* The paper ball */
   const snapshot = new THREE.WebGLRenderTarget(1, 1);
+  const notesMap: THREE.IUniform<THREE.Texture | null> = { value: null };
 
   const paper = new THREE.ShaderMaterial({
     side: THREE.DoubleSide,
     uniforms: {
       tSheet: { value: snapshot.texture },
-      tNotes: { value: null as THREE.Texture | null },
+      tNotes: notesMap,
       crumple: { value: 0 },
       radius: { value: 2 },
       ball: { value: new THREE.Matrix4() },
@@ -340,7 +345,7 @@ export function createInk(
       const w = Math.floor(width * ratio);
       const h = Math.floor(height * ratio);
       tone.setSize(w, h);
-      shape.setSize(w, h);
+      normalDepth.setSize(w, h);
       snapshot.setSize(w, h);
       composite.uniforms.res.value.set(w, h);
       composite.uniforms.dpr.value = ratio;
@@ -350,13 +355,12 @@ export function createInk(
     },
     /** Points the shader at the glass layer's offset map. Re-uploads only when it changed. */
     refractThrough(map: HTMLCanvasElement, changed: boolean, active: boolean) {
-      let texture = composite.uniforms.tRefract
-        .value as THREE.CanvasTexture | null;
+      let texture = refractMap.value;
 
       if (!texture || changed) {
         texture?.dispose();
         texture = new THREE.CanvasTexture(map);
-        composite.uniforms.tRefract.value = texture;
+        refractMap.value = texture;
       }
 
       composite.uniforms.refract.value = active ? 34 : 0;
@@ -366,8 +370,8 @@ export function createInk(
       renderer.setRenderTarget(snapshot);
       renderer.render(screen, screenCamera);
       renderer.setRenderTarget(null);
-      (paper.uniforms.tNotes.value as THREE.Texture | null)?.dispose();
-      paper.uniforms.tNotes.value = new THREE.CanvasTexture(notes);
+      notesMap.value?.dispose();
+      notesMap.value = new THREE.CanvasTexture(notes);
       paper.uniforms.crumple.value = 0;
       paper.uniforms.ball.value.identity();
 
@@ -428,7 +432,7 @@ export function createInk(
       camera.layers.disable(INK_LAYER);
       renderer.shadowMap.autoUpdate = false;
       scene.overrideMaterial = normals;
-      renderer.setRenderTarget(shape);
+      renderer.setRenderTarget(normalDepth);
       renderer.setClearColor(facing, 1);
       renderer.clear();
       renderer.render(scene, camera);
@@ -444,7 +448,7 @@ export function createInk(
     },
     dispose() {
       tone.dispose();
-      shape.dispose();
+      normalDepth.dispose();
       normals.dispose();
       composite.dispose();
       snapshot.dispose();

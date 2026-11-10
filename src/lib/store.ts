@@ -3,7 +3,11 @@ import type { Engine } from '#/engine';
 import { unlockAudio } from './sound';
 
 /** Handle on the drawing engine, for the few DOM controls that need to poke it. */
-export const engine: { current: Engine | null } = { current: null };
+interface EngineHandle {
+  current: Engine | null;
+}
+
+export const engine: EngineHandle = { current: null };
 
 let begun = false;
 const beginListeners = new Set<() => void>();
