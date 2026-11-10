@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "landing",
+      "name": "crumple-landing",
       "dependencies": {
         "@fontsource/old-standard-tt": "^5.3.0",
         "@fontsource/reenie-beanie": "^5.3.0",
