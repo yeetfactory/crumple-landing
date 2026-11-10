@@ -1,7 +1,7 @@
-import { defineConfig } from '@rsbuild/core'
-import { pluginReact } from '@rsbuild/plugin-react'
-import { pluginTailwindcss } from '@rsbuild/plugin-tailwindcss'
-import { tanstackStart } from '@tanstack/react-start/plugin/rsbuild'
+import { defineConfig } from '@rsbuild/core';
+import { pluginReact } from '@rsbuild/plugin-react';
+import { pluginTailwindcss } from '@rsbuild/plugin-tailwindcss';
+import { tanstackStart } from '@tanstack/react-start/plugin/rsbuild';
 
 export default defineConfig({
   server: {
@@ -17,4 +17,4 @@ export default defineConfig({
       pages: [{ path: '/' }],
     }),
   ],
-})
+});

@@ -1,15 +1,23 @@
-import type { Engine } from '#/engine'
-import { unlockAudio } from './sound'
+import type { Engine } from '#/engine';
+
+import { unlockAudio } from './sound';
 
 /** Handle on the drawing engine, for the few DOM controls that need to poke it. */
-export const engine: { current: Engine | null } = { current: null }
+interface EngineHandle {
+  current: Engine | null;
+}
 
-let begun = false
-const beginListeners = new Set<() => void>()
+export const engine: EngineHandle = { current: null };
+
+let begun = false;
+const beginListeners = new Set<() => void>();
 
 export function onBegin(listener: () => void) {
-  beginListeners.add(listener)
-  return () => { beginListeners.delete(listener) }
+  beginListeners.add(listener);
+
+  return () => {
+    beginListeners.delete(listener);
+  };
 }
 
 /**
@@ -18,11 +26,13 @@ export function onBegin(listener: () => void) {
  * who scrolls instead still gets the letters, silently.
  */
 export function begin(withSound: boolean) {
-  if (withSound) unlockAudio()
-  if (begun) return
-  begun = true
-  document.documentElement.dataset.started = 'true'
-  for (const listener of beginListeners) listener()
+  if (withSound) unlockAudio();
+
+  if (begun) return;
+  begun = true;
+  document.documentElement.dataset.started = 'true';
+
+  for (const listener of beginListeners) listener();
 }
 
-export const hasBegun = () => begun
+export const hasBegun = () => begun;

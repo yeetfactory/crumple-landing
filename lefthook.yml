@@ -1,0 +1,16 @@
+# Hooks only check; they never rewrite files or touch the staging area.
+pre-commit:
+  parallel: true
+  jobs:
+    - name: Format staged files
+      glob: '*.{js,mjs,cjs,ts,mts,cts,jsx,tsx,json,jsonc,css,html,md,mdx,yml,yaml}'
+      run: bun fmt --no-script --check --no-error-on-unmatched-pattern {staged_files}
+
+    - name: Lint staged files
+      glob: '*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'
+      run: bun run lint --no-error-on-unmatched-pattern {staged_files}
+
+pre-push:
+  jobs:
+    - name: Typecheck
+      run: bun run typecheck

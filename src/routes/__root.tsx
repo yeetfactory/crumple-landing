@@ -1,10 +1,11 @@
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
+import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router';
 
-import appCss from '../styles.css?url'
+import appCss from '../styles.css?url';
 
-const title = 'Yeet Factory'
+const title = 'Yeet Factory';
+
 const description =
-  'Fun projects by Rishikesh and Sriram. Projects upcoming, stay tuned.'
+  'Fun projects by Rishikesh and Sriram. Projects upcoming, stay tuned.';
 
 export const Route = createRootRoute({
   head: () => ({
@@ -24,7 +25,7 @@ export const Route = createRootRoute({
     ],
   }),
   shellComponent: RootDocument,
-})
+});
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -37,5 +38,5 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
-  )
+  );
 }

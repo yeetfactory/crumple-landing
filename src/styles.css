@@ -1,8 +1,8 @@
-@import "tailwindcss";
-@import "@fontsource/old-standard-tt/400.css";
-@import "@fontsource/old-standard-tt/400-italic.css";
-@import "@fontsource/old-standard-tt/700.css";
-@import "@fontsource/reenie-beanie/400.css";
+@import 'tailwindcss';
+@import '@fontsource/old-standard-tt/400';
+@import '@fontsource/old-standard-tt/400-italic';
+@import '@fontsource/old-standard-tt/700';
+@import '@fontsource/reenie-beanie/400';
 
 @theme {
   --color-paper: #1239a6;
@@ -58,10 +58,10 @@ body {
 .dom-title {
   transition: opacity 0.25s linear;
 }
-html[data-engine="ready"] .dom-title {
+html[data-engine='ready'] .dom-title {
   opacity: 0;
 }
-html:not([data-engine="ready"]) .needs-engine {
+html:not([data-engine='ready']) .needs-engine {
   visibility: hidden;
 }
 
@@ -69,9 +69,12 @@ html:not([data-engine="ready"]) .needs-engine {
 .gate {
   visibility: hidden;
   opacity: 0;
-  transition: opacity 0.14s linear, transform 0.14s ease-in, visibility 0s 0.14s;
+  transition:
+    opacity 0.14s linear,
+    transform 0.14s ease-in,
+    visibility 0s 0.14s;
 }
-html[data-engine="ready"]:not([data-started]) .gate {
+html[data-engine='ready']:not([data-started]) .gate {
   visibility: visible;
   opacity: 1;
   transition: opacity 0.3s linear;
@@ -79,13 +82,15 @@ html[data-engine="ready"]:not([data-started]) .gate {
 html[data-started] .gate {
   transform: scale(0.7);
 }
-html[data-engine="ready"]:not([data-started]) .after-start {
+html[data-engine='ready']:not([data-started]) .after-start {
   opacity: 0;
   visibility: hidden;
 }
 /* Only the arrival is animated. Hiding it on load has to be instant, or it ghosts in and out. */
 html[data-started] .after-start {
-  transition: opacity 0.7s linear 1.5s, visibility 0s linear 1.5s;
+  transition:
+    opacity 0.7s linear 1.5s,
+    visibility 0s linear 1.5s;
 }
 .actuator.actuator-large {
   width: clamp(11rem, 19vw, 17rem);
@@ -104,7 +109,7 @@ html[data-started] .after-start {
 main {
   transition: opacity 0.5s linear;
 }
-html[data-crumple="true"] main {
+html[data-crumple='true'] main {
   opacity: 0;
   pointer-events: none;
 }
@@ -170,7 +175,7 @@ html[data-crumple="true"] main {
   clip-path: inset(-20% 100% -20% 0);
   transition: clip-path 1.5s cubic-bezier(0.55, 0.1, 0.3, 1);
 }
-.signature[data-signed="true"] {
+.signature[data-signed='true'] {
   clip-path: inset(-20% -5% -20% 0);
 }
 
