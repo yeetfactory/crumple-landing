@@ -1,6 +1,10 @@
-# Yeet Factory — landing page
+# Crumple
 
-The landing page for **Yeet Factory**: fun projects by Rishikesh and Sriram.
+**Crumple** is an interactive, hand-drawn landing page for **Yeet Factory**:
+fun projects by Rishikesh and Sriram. It is a standalone project. The main
+Yeet Factory site, which lists all our projects, lives in a separate repo.
+
+Live at [crumple.yeetfactory.top](https://crumple.yeetfactory.top).
 
 Press the big **YEET** button and the page comes to life. It is a hand-drawn,
 scroll-driven 3D scene on a sheet of paper. The letters drop in, a lever gets
@@ -31,6 +35,13 @@ bun run dev        # http://localhost:3000
 bun run build      # writes dist/client and dist/server
 bun run start      # serves the SSR build with srvx
 ```
+
+## Deployment
+
+The site runs on Cloudflare Pages as the `crumple-landing` project, at
+[crumple.yeetfactory.top](https://crumple.yeetfactory.top). Pages builds from
+this repo with `bun run build` and serves `dist/client`. Every push to `main`
+deploys to production. Other branches get preview deployments.
 
 ## Project layout
 

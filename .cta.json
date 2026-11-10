@@ -1,6 +1,6 @@
 {
   "bundler": "rsbuild",
-  "projectName": "landing",
+  "projectName": "crumple-landing",
   "mode": "file-router",
   "typescript": true,
   "packageManager": "bun",
