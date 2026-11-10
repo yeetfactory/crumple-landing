@@ -14,6 +14,8 @@ export function Stage() {
 
   useEffect(() => {
     loadSoundPreference();
+    // Returning visitors may already have autoplay permission before any input on this page.
+    void unlockAudio();
 
     let cancelled = false;
     const byId = (id: string) => document.getElementById(id);
@@ -103,8 +105,7 @@ export function Stage() {
     )
       begin(false);
 
-    // Only these events let a page start audio; wheel and scroll never do. A touch only counts on
-    // release, so a swipe needs `touchend`: the `touchmove` that starts the intro is too early.
+    // Retry on gestures browsers accept for audio, including touch release.
     for (const type of AUDIO_UNLOCK_EVENTS) addEventListener(type, unlockAudio);
 
     return () => {

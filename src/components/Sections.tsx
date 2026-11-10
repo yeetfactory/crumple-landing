@@ -25,7 +25,7 @@ export function Tree() {
   );
 }
 
-function Signature({ name }: { name: string }) {
+function Signature({ name }: { name: (typeof site.people)[number] }) {
   // Watch the wrapper: the signature itself starts fully clipped, which reads as "not visible".
   const ref = useRef<HTMLDivElement>(null);
   const [signed, setSigned] = useState(false);
@@ -55,8 +55,51 @@ function Signature({ name }: { name: string }) {
       >
         {name}
       </span>
-      <div className="mt-1 border-t border-chalk pt-2 text-center font-serif text-[1.1rem] italic">
-        Co-founder
+      <div className="mt-1 flex justify-center gap-3 pt-2">
+        <a
+          href={site.profiles[name].github}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`${name} on GitHub (opens in a new tab)`}
+          title={`${name} on GitHub`}
+          className="focus-ring inline-flex size-11 items-center justify-center text-chalk hover:text-pencil"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            className="size-7"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            style={{ filter: 'url(#rough-small)' }}
+          >
+            <path d="M9 19c-4.3 1.3-4.3-2.2-6-2.6M15 22v-3.4c0-1-.1-1.7-.6-2.2 3.1-.4 6.3-1.5 6.3-6.8 0-1.5-.5-2.7-1.4-3.7.2-.4.6-1.8-.1-3.6 0 0-1.2-.4-3.8 1.4a13 13 0 0 0-6.8 0C6 1.9 4.8 2.3 4.8 2.3c-.7 1.8-.3 3.2-.1 3.6a5.3 5.3 0 0 0-1.4 3.7c0 5.3 3.2 6.4 6.3 6.8-.4.4-.6 1.1-.6 2.2V22" />
+          </svg>
+        </a>
+        <a
+          href={site.profiles[name].website}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`${name}'s website (opens in a new tab)`}
+          title={`${name}'s website`}
+          className="focus-ring inline-flex size-11 items-center justify-center text-chalk hover:text-pencil"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            className="size-7"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            style={{ filter: 'url(#rough-small)' }}
+          >
+            <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM3.5 9h17M3.5 15h17M12 3c-5 5-5 13 0 18 5-5 5-13 0-18Z" />
+          </svg>
+        </a>
       </div>
     </div>
   );

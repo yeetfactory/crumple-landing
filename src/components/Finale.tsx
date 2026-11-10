@@ -54,7 +54,7 @@ export function Finale() {
           start.current = { x: e.clientX, y: e.clientY };
           dragging.current = true;
           tooth.current = 0;
-          unlockAudio();
+          void unlockAudio();
           // Give under the hand straight away, so it's obvious this thing moves.
           engine.current?.pullLever(NUDGE);
           playRatchet();
