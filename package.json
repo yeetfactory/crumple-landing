@@ -2,6 +2,10 @@
   "name": "crumple-landing",
   "private": true,
   "type": "module",
+  "packageManager": "bun@1.4.4",
+  "engines": {
+    "node": "^24.22.1"
+  },
   "imports": {
     "#/*": "./src/*"
   },
@@ -10,7 +14,14 @@
     "generate-routes": "rsbuild build",
     "build": "rsbuild build",
     "start": "srvx --prod -s ../client dist/server/index.js",
-    "preview": "rsbuild preview"
+    "preview": "rsbuild preview",
+    "format": "bun fmt --no-script --check .",
+    "format:write": "bun fmt --no-script --write .",
+    "lint": "oxlint -c .oxlintrc.json",
+    "typecheck": "bun check --no-script",
+    "knip": "knip --no-config-hints",
+    "test": "bun test",
+    "check": "bun run format && bun run lint && bun run typecheck && bun run knip && bun run test"
   },
   "dependencies": {
     "@fontsource/old-standard-tt": "^5.3.0",
@@ -27,6 +38,7 @@
     "three": "^0.187.0"
   },
   "devDependencies": {
+    "@oxlint/plugins": "1.93.0",
     "@rsbuild/core": "^2.1.13",
     "@rsbuild/plugin-react": "^2.1.0",
     "@rsbuild/plugin-tailwindcss": "^2.0.3",
@@ -34,6 +46,10 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@types/three": "^0.187.0",
-    "typescript": "^6.0.2"
+    "knip": "6.44.2",
+    "oxlint": "1.93.0",
+    "oxlint-plugin-react-doctor": "0.9.22",
+    "oxlint-tsgolint": "7.0.2006",
+    "typescript": "7.0.2"
   }
 }

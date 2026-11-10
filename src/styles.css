@@ -1,8 +1,8 @@
 @import "tailwindcss";
-@import "@fontsource/old-standard-tt/400.css";
-@import "@fontsource/old-standard-tt/400-italic.css";
-@import "@fontsource/old-standard-tt/700.css";
-@import "@fontsource/reenie-beanie/400.css";
+@import "@fontsource/old-standard-tt/400";
+@import "@fontsource/old-standard-tt/400-italic";
+@import "@fontsource/old-standard-tt/700";
+@import "@fontsource/reenie-beanie/400";
 
 @theme {
   --color-paper: #1239a6;

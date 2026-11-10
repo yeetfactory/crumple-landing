@@ -1,0 +1,21 @@
+{
+  "printWidth": 80,
+  "singleQuote": true,
+  "sortImports": {},
+  "sortPackageJson": false,
+  "sortTailwindcss": {
+    "functions": ["clsx", "cn", "cva"],
+    "stylesheet": "src/styles.css"
+  },
+  "ignorePatterns": [
+    ".git/**",
+    "node_modules/**",
+    "dist/**",
+    ".tanstack/**",
+    ".agents/**",
+    ".claude/**",
+    "skills-lock.json",
+    "src/routeTree.gen.ts",
+    "tools/oxlint/anti-slop/**"
+  ]
+}

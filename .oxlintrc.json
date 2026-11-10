@@ -1,0 +1,84 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import", "react", "jsx-a11y"],
+  "jsPlugins": [
+    {
+      "name": "react-doctor",
+      "specifier": "oxlint-plugin-react-doctor"
+    },
+    {
+      "name": "anti-slop",
+      "specifier": "./tools/oxlint/anti-slop/index.ts"
+    }
+  ],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error"
+  },
+  "rules": {
+    "no-unused-vars": "error",
+    "no-shadow": "error",
+    "no-underscore-dangle": "error",
+    "unicorn/consistent-function-scoping": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/no-floating-promises": "error",
+    "import/no-named-as-default": "error",
+    "import/no-unassigned-import": ["error", { "allow": ["**/*.css"] }],
+    "react/exhaustive-deps": "error",
+    "react/react-in-jsx-scope": "off",
+    "react-doctor/no-derived-state-effect": "error",
+    "react-doctor/no-fetch-in-effect": "error",
+    "jsx_a11y/anchor-has-content": "error",
+    "jsx_a11y/aria-role": "error",
+    "jsx_a11y/click-events-have-key-events": "error",
+    "jsx_a11y/heading-has-content": "error",
+    "jsx_a11y/iframe-has-title": "error",
+    "jsx_a11y/label-has-associated-control": "error",
+    "jsx_a11y/media-has-caption": "error",
+    "jsx_a11y/no-autofocus": "error",
+    "jsx_a11y/no-redundant-roles": "error",
+    "jsx_a11y/no-static-element-interactions": "error",
+    "jsx_a11y/role-has-required-aria-props": "error",
+    "jsx_a11y/role-supports-aria-props": "error",
+    "oxc/no-accumulating-spread": "error",
+    "anti-slop/no-array-filter-map": "error",
+    "anti-slop/no-reduce-accumulator-copy": "error",
+    "anti-slop/no-chained-type-assertions": "error",
+    "anti-slop/no-conditional-empty-object-spread": "error",
+    "anti-slop/no-known-value-widening": "error",
+    "anti-slop/no-module-mocking": "error",
+    "anti-slop/no-object-parameters": "error",
+    "anti-slop/no-reflect-apply": "error",
+    "anti-slop/no-reflect-get": "error",
+    "anti-slop/no-runtime-typeof": "error",
+    "anti-slop/no-shape-in-symbol-names": "error",
+    "anti-slop/no-unknown-parameters": "error",
+    "anti-slop/no-unknown-returns": "error",
+    "anti-slop/no-unknown-type-aliases": "error",
+    "anti-slop/no-unsafe-dictionary-type": "error",
+    "anti-slop/no-widen-then-assert": "error",
+    "anti-slop/require-readable-spacing": "error",
+    "anti-slop/require-safety-comment-for-type-assertion": "error"
+  },
+  "ignorePatterns": [
+    ".agent/**",
+    ".agents/**",
+    ".claude/**",
+    ".codex/**",
+    ".continue/**",
+    ".cursor/**",
+    ".gemini/**",
+    ".opencode/**",
+    ".pi/**",
+    ".roo/**",
+    ".windsurf/**",
+    "**/node_modules/**",
+    ".tanstack/**",
+    "dist/**",
+    "src/routeTree.gen.ts",
+    "tools/oxlint/anti-slop/**"
+  ],
+  "options": {
+    "typeAware": true
+  }
+}
