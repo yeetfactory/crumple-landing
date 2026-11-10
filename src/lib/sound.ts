@@ -63,7 +63,7 @@ function roomImpulse(ctx: BaseAudioContext) {
 }
 
 /** Builds the output chain. Takes any context so it can also be rendered offline for tests. */
-export function attachRig(ctx: BaseAudioContext) {
+function attachRig(ctx: BaseAudioContext) {
   const out = ctx.createGain();
   out.gain.value = 1.5;
 

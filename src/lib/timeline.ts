@@ -2,7 +2,7 @@
 
 export const CRATE_COUNT = 3;
 const STAGGER = 0.5;
-export const TIMELINE_SPAN = 1 + (CRATE_COUNT - 1) * STAGGER;
+const TIMELINE_SPAN = 1 + (CRATE_COUNT - 1) * STAGGER;
 
 /** Phase boundaries inside one crate's 0..1 life. */
 export const PHASE = {
@@ -25,7 +25,3 @@ export const smooth = (t: number) => t * t * (3 - 2 * t);
 /** Crate i's local life for line progress q (0..1). Unclamped: <0 unborn, >1 gone. */
 export const crateLife = (q: number, i: number) =>
   q * TIMELINE_SPAN - i * STAGGER;
-
-/** Which crate the DOM panel should describe at line progress q. */
-export const activeCrate = (q: number) =>
-  clamp(Math.floor((q * TIMELINE_SPAN - 0.2) / STAGGER), 0, CRATE_COUNT - 1);
