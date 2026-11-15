@@ -20,26 +20,48 @@ let lastGlass = -1;
 
 const preferenceListeners = new Set<() => void>();
 
+function notifySoundChange() {
+  for (const listener of preferenceListeners) listener();
+}
+
 export function loadSoundPreference() {
-  enabled = localStorage.getItem(STORAGE_KEY) !== 'off';
+  const next = localStorage.getItem(STORAGE_KEY) !== 'off';
+
+  if (enabled !== next) {
+    enabled = next;
+
+    notifySoundChange();
+  }
 
   return enabled;
 }
+
+// Browser playback restrictions never change the visitor's chosen setting.
+export const getSoundStatus = () => (enabled ? 'on' : 'off');
 
 export function setSoundEnabled(next: boolean) {
   enabled = next;
   localStorage.setItem(STORAGE_KEY, next ? 'on' : 'off');
 
-  for (const listener of preferenceListeners) listener();
+  notifySoundChange();
 }
 
-/** Lets the sound toggle re-read the preference whenever it changes. */
-export function onSoundPreferenceChange(listener: () => void) {
+/** Keep controls in sync with the saved preference. */
+export function onSoundChange(listener: () => void) {
   preferenceListeners.add(listener);
+  addEventListener('storage', onStoredPreferenceChange);
+  loadSoundPreference();
 
   return () => {
     preferenceListeners.delete(listener);
+
+    if (!preferenceListeners.size)
+      removeEventListener('storage', onStoredPreferenceChange);
   };
+}
+
+function onStoredPreferenceChange(event: StorageEvent) {
+  if (event.key === STORAGE_KEY || event.key === null) loadSoundPreference();
 }
 
 /** A warehouse: a second of decaying noise that gets darker as it dies away. */
@@ -93,22 +115,27 @@ function attachRig(ctx: BaseAudioContext) {
 
   for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
 
-  rig = { ctx, out, noise };
+  return { ctx, out, noise };
 }
 
-/** Must be called from a user gesture. Browsers keep audio locked until then. */
-export function unlockAudio() {
-  if (rig) {
-    if (rig.ctx instanceof AudioContext && rig.ctx.state === 'suspended')
-      void rig.ctx.resume();
+/** Attempt playback now, and allow a later user gesture to retry if the browser blocks it. */
+export async function unlockAudio() {
+  if (!enabled) return;
 
-    return;
+  try {
+    if (!rig) {
+      rig = attachRig(new AudioContext());
+    }
+
+    if (rig?.ctx instanceof AudioContext && rig.ctx.state === 'suspended')
+      await rig.ctx.resume();
+  } catch {
+    // A later gesture can retry; blocked impacts are never scheduled for later.
   }
-
-  attachRig(new AudioContext());
 }
 
-const live = () => (enabled ? rig : null);
+// Scheduling on a suspended context would replay all those old impacts when it resumes.
+const live = () => (enabled && rig?.ctx.state === 'running' ? rig : null);
 
 function panned(r: Rig, pan: number) {
   const p = r.ctx.createStereoPanner();

@@ -21,12 +21,12 @@ export function onBegin(listener: () => void) {
 }
 
 /**
- * Browsers block all audio until the visitor interacts, so the opening waits for the YEET press
- * and the first slam can have its sound. `withSound` is false only when the opening is skipped
- * (reduced motion, or arriving partway down the page) and nobody has pressed anything yet.
+ * The opening waits for the YEET press so browsers can unlock audio before the first slam.
+ * `withSound` is false when the opening is skipped (reduced motion, or arriving partway down
+ * the page). Blocked audio never holds up the visual reveal or queues old impacts.
  */
 export function begin(withSound: boolean) {
-  if (withSound) unlockAudio();
+  if (withSound) void unlockAudio();
 
   if (begun) return;
   begun = true;

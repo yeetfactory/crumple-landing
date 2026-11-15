@@ -1,8 +1,8 @@
 import { useEffect, useRef, useSyncExternalStore } from 'react';
 
 import {
-  loadSoundPreference,
-  onSoundPreferenceChange,
+  getSoundStatus,
+  onSoundChange,
   playClick,
   setSoundEnabled,
   unlockAudio,
@@ -12,22 +12,23 @@ import { site } from '#/site';
 
 function SoundToggle() {
   // The prerendered page assumes sound is on; the stored choice applies once the page is live.
-  const on = useSyncExternalStore(
-    onSoundPreferenceChange,
-    loadSoundPreference,
-    () => true,
+  const status = useSyncExternalStore(
+    onSoundChange,
+    getSoundStatus,
+    () => 'on',
   );
+
+  const on = status === 'on';
 
   return (
     <button
       type="button"
-      className="focus-ring pointer-events-auto cursor-pointer border-0 bg-transparent p-1 text-chalk transition-transform duration-100 hover:scale-110 active:scale-90"
+      className="focus-ring pointer-events-auto inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center border-0 bg-transparent p-1 text-chalk"
       aria-label={on ? 'Turn sound off' : 'Turn sound on'}
       aria-pressed={on}
       onClick={() => {
-        unlockAudio();
         setSoundEnabled(!on);
-        playClick();
+        void unlockAudio().then(playClick);
       }}
     >
       <svg
@@ -166,7 +167,7 @@ export function Hero() {
           </p>
           <Actuator
             onPress={() => {
-              unlockAudio();
+              void unlockAudio();
               engine.current?.yeetAll();
             }}
           />
