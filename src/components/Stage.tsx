@@ -4,6 +4,8 @@ import { createIntroGate } from '#/lib/intro';
 import { loadSoundPreference, unlockAudio } from '#/lib/sound';
 import { begin, engine, hasBegun, onBegin } from '#/lib/store';
 
+const AUDIO_UNLOCK_EVENTS = ['click', 'keydown', 'touchend'] as const;
+
 /** The fixed drawing surface, plus the layers for annotations and screen cracks. */
 export function Stage() {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -101,8 +103,9 @@ export function Stage() {
     )
       begin(false);
 
-    // Touch screens only unlock audio on release, not on the initial press.
-    addEventListener('click', unlockAudio);
+    // Only these events let a page start audio; wheel and scroll never do. A touch only counts on
+    // release, so a swipe needs `touchend`: the `touchmove` that starts the intro is too early.
+    for (const type of AUDIO_UNLOCK_EVENTS) addEventListener(type, unlockAudio);
 
     return () => {
       cancelled = true;
@@ -110,7 +113,10 @@ export function Stage() {
       clearTimeout(revealTimer);
       clearTimeout(fallbackTimer);
       intro.destroy();
-      removeEventListener('click', unlockAudio);
+
+      for (const type of AUDIO_UNLOCK_EVENTS)
+        removeEventListener(type, unlockAudio);
+
       engine.current?.destroy();
       engine.current = null;
       delete document.documentElement.dataset.engine;
