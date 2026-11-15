@@ -148,7 +148,7 @@ export function Hero() {
           onPress={() => begin(true)}
         />
         <p
-          className="m-0 mt-4 -rotate-3 font-hand text-[clamp(1.8rem,3vw,2.3rem)] leading-none"
+          className="gate-hint m-0 mt-4 -rotate-3 font-hand text-[clamp(1.8rem,3vw,2.3rem)] leading-none"
           aria-hidden="true"
         >
           Click to start

@@ -105,6 +105,38 @@ html[data-started] .after-start {
   }
 }
 
+/* Scrolling before the first press shakes the button and the hint, to say "this first". */
+html[data-nudge] .actuator.actuator-large {
+  animation: nudge 0.7s cubic-bezier(0.3, 0, 0.3, 1);
+}
+html[data-nudge] .gate-hint {
+  animation: nudge-hint 0.7s ease-out;
+}
+@keyframes nudge {
+  15% {
+    transform: scale(1.22) rotate(-9deg);
+  }
+  30% {
+    transform: scale(1.18) rotate(8deg);
+  }
+  45% {
+    transform: scale(1.14) rotate(-6deg);
+  }
+  60% {
+    transform: scale(1.08) rotate(4deg);
+  }
+  80% {
+    transform: scale(1.02) rotate(-1deg);
+  }
+}
+@keyframes nudge-hint {
+  20%,
+  60% {
+    color: var(--color-pencil);
+    transform: translateY(-0.35rem) scale(1.18);
+  }
+}
+
 /* While the page is a paper ball, the DOM has to get out of its way. */
 main {
   transition: opacity 0.5s linear;
@@ -187,7 +219,9 @@ html[data-crumple='true'] main {
     clip-path: none;
     transition: none;
   }
-  .actuator.actuator-large {
+  .actuator.actuator-large,
+  html[data-nudge] .actuator.actuator-large,
+  html[data-nudge] .gate-hint {
     animation: none;
   }
 }

@@ -1,15 +1,9 @@
 import { afterEach, beforeEach, expect, mock, test } from 'bun:test';
 
 let begun = false;
-const starts = [];
 
 mock.module('../src/lib/store', () => ({
   hasBegun: () => begun,
-  begin: (withSound) => {
-    if (begun) return;
-    begun = true;
-    starts.push(withSound);
-  },
 }));
 
 const { createIntroGate } = await import('../src/lib/intro');
@@ -43,7 +37,6 @@ function send(type, properties = {}) {
 
 beforeEach(() => {
   begun = false;
-  starts.length = 0;
   reducedMotion = false;
   listeners = new Map();
   Object.assign(globalThis, {
@@ -64,20 +57,37 @@ beforeEach(() => {
 
 afterEach(() => gate?.destroy());
 
-test('a small downward wheel gesture starts the intro without moving the page', () => {
+test('scrolling down nudges the button instead of starting or moving the page', () => {
   gate = createIntroGate();
   expect(document.documentElement.dataset.introLocked).toBe('true');
   expect(send('wheel', { deltaY: 8, deltaMode: 0 }).defaultPrevented).toBe(
     true,
   );
-  expect(begun).toBe(false);
+  expect(document.documentElement.dataset.nudge).toBeUndefined();
   expect(send('wheel', { deltaY: 16, deltaMode: 0 }).defaultPrevented).toBe(
     true,
   );
-  expect(starts).toEqual([false]);
-  send('wheel', { deltaY: 120, deltaMode: 0 });
-  expect(starts).toHaveLength(1);
+  expect(document.documentElement.dataset.nudge).toBe('true');
+  send('wheel', { deltaY: 1200, deltaMode: 0 });
+  expect(begun).toBe(false);
   expect(document.documentElement.dataset.introLocked).toBe('true');
+});
+
+test('the nudge plays out and can then play again', async () => {
+  gate = createIntroGate();
+  send('wheel', { deltaY: 100, deltaMode: 0 });
+  expect(document.documentElement.dataset.nudge).toBe('true');
+  await Bun.sleep(750);
+  expect(document.documentElement.dataset.nudge).toBeUndefined();
+  send('wheel', { deltaY: 100, deltaMode: 0 });
+  expect(document.documentElement.dataset.nudge).toBe('true');
+});
+
+test('scrolling no longer nudges once the button is pressed', () => {
+  gate = createIntroGate();
+  begun = true;
+  send('wheel', { deltaY: 100, deltaMode: 0 });
+  expect(document.documentElement.dataset.nudge).toBeUndefined();
 });
 
 test('upward scrolling stays pinned without starting the intro', () => {
@@ -86,12 +96,13 @@ test('upward scrolling stays pinned without starting the intro', () => {
     true,
   );
   expect(begun).toBe(false);
+  expect(document.documentElement.dataset.nudge).toBeUndefined();
 });
 
 test.each([1, 2])('normalizes wheel deltaMode %i', (deltaMode) => {
   gate = createIntroGate();
   send('wheel', { deltaY: 3, deltaMode });
-  expect(begun).toBe(true);
+  expect(document.documentElement.dataset.nudge).toBe('true');
 });
 
 test('click-started reveal releases immediately when no scroll gesture is active', () => {
@@ -120,13 +131,14 @@ test('trackpad momentum remains consumed after the reveal until the gesture stop
   );
 });
 
-test('an upward finger swipe starts the intro and stays pinned through touch release', async () => {
+test('an upward finger swipe nudges and stays pinned through touch release', async () => {
   gate = createIntroGate();
   send('touchstart', { touches: [{ clientY: 500 }] });
   expect(
     send('touchmove', { touches: [{ clientY: 470 }] }).defaultPrevented,
   ).toBe(true);
-  expect(starts).toEqual([true]);
+  expect(document.documentElement.dataset.nudge).toBe('true');
+  expect(begun).toBe(false);
   gate.complete();
   await Bun.sleep(200);
   expect(document.documentElement.dataset.introLocked).toBe('true');
@@ -138,7 +150,8 @@ test('an upward finger swipe starts the intro and stays pinned through touch rel
 test('holding a scroll key never carries its repeats into page scrolling', async () => {
   gate = createIntroGate();
   expect(send('keydown', { key: 'PageDown' }).defaultPrevented).toBe(true);
-  expect(starts).toEqual([true]);
+  expect(document.documentElement.dataset.nudge).toBe('true');
+  expect(begun).toBe(false);
   gate.complete();
   await Bun.sleep(200);
   expect(document.documentElement.dataset.introLocked).toBe('true');
@@ -183,6 +196,7 @@ test('failure or unmount releases scrolling and removes input listeners', () => 
   gate.destroy();
   expect(document.documentElement.dataset.introLocked).toBeUndefined();
   expect([...listeners.values()].every((set) => set.size === 0)).toBe(true);
+  expect(document.documentElement.dataset.nudge).toBeUndefined();
   expect(send('wheel', { deltaY: 100, deltaMode: 0 }).defaultPrevented).toBe(
     false,
   );
