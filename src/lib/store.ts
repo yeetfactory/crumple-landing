@@ -21,9 +21,9 @@ export function onBegin(listener: () => void) {
 }
 
 /**
- * Browsers block all audio until the visitor interacts, so the opening waits for that press and
- * the first slam can have its sound. Scrolling isn't a gesture that unlocks audio, so a visitor
- * who scrolls instead still gets the letters, silently.
+ * Browsers block all audio until the visitor interacts, so the opening waits for the YEET press
+ * and the first slam can have its sound. `withSound` is false only when the opening is skipped
+ * (reduced motion, or arriving partway down the page) and nobody has pressed anything yet.
  */
 export function begin(withSound: boolean) {
   if (withSound) unlockAudio();

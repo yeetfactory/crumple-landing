@@ -1,7 +1,10 @@
-import { begin, hasBegun } from './store';
+import { hasBegun } from './store';
 
 const GESTURE_THRESHOLD = 24;
 const GESTURE_IDLE_MS = 180;
+
+// Matches the `nudge` animation in styles.css.
+const NUDGE_MS = 700;
 
 const SCROLL_KEYS = new Set([
   'ArrowDown',
@@ -13,7 +16,11 @@ const SCROLL_KEYS = new Set([
   ' ',
 ]);
 
-/** Consume the opening gesture before the browser can move the page or camera. */
+/**
+ * Hold the page at the top until the visitor presses YEET. Trying to scroll first only nudges the
+ * button, so it's clear what to do and the page doesn't look frozen. Once released, the gate is
+ * gone for the rest of the visit.
+ */
 export function createIntroGate() {
   const root = document.documentElement;
 
@@ -30,6 +37,7 @@ export function createIntroGate() {
   let touchY: number | null = null;
   const heldKeys = new Set<string>();
   let releaseTimer: ReturnType<typeof setTimeout> | undefined;
+  let nudgeTimer: ReturnType<typeof setTimeout> | undefined;
 
   function detach() {
     removeEventListener('wheel', onWheel, true);
@@ -45,7 +53,9 @@ export function createIntroGate() {
   function unlock() {
     locked = false;
     clearTimeout(releaseTimer);
+    clearTimeout(nudgeTimer);
     delete root.dataset.introLocked;
+    delete root.dataset.nudge;
     detach();
   }
 
@@ -57,6 +67,13 @@ export function createIntroGate() {
 
     if (remaining > 0) releaseTimer = setTimeout(releaseWhenIdle, remaining);
     else unlock();
+  }
+
+  /** Point at the button. A nudge already playing runs to the end rather than restarting. */
+  function nudge() {
+    if (hasBegun() || root.dataset.nudge) return;
+    root.dataset.nudge = 'true';
+    nudgeTimer = setTimeout(() => delete root.dataset.nudge, NUDGE_MS);
   }
 
   function consume(event: Event) {
@@ -77,7 +94,10 @@ export function createIntroGate() {
 
     wheelDistance = Math.max(0, wheelDistance + event.deltaY * unit);
 
-    if (wheelDistance >= GESTURE_THRESHOLD) begin(false);
+    if (wheelDistance >= GESTURE_THRESHOLD) {
+      wheelDistance = 0;
+      nudge();
+    }
   }
 
   function onTouchStart(event: TouchEvent) {
@@ -88,7 +108,7 @@ export function createIntroGate() {
     if (touchY === null || event.touches.length !== 1) return;
     consume(event);
 
-    if (touchY - event.touches[0].clientY >= GESTURE_THRESHOLD) begin(true);
+    if (touchY - event.touches[0].clientY >= GESTURE_THRESHOLD) nudge();
   }
 
   function onTouchEnd(event: TouchEvent) {
@@ -121,9 +141,8 @@ export function createIntroGate() {
     if (
       ['ArrowDown', 'PageDown', 'End'].includes(event.key) ||
       (event.key === ' ' && !event.shiftKey)
-    ) {
-      begin(true);
-    }
+    )
+      nudge();
   }
 
   function onKeyUp(event: KeyboardEvent) {
